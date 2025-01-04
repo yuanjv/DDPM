@@ -4,6 +4,7 @@ from torch.nn import functional as F
 from decoder import VAE_AttentionBlock, VAE_ResidualBlock
 
 CHANNEL=128
+OUT_CHANNEL=8
 
 class VAE_Encoder(nn.Sequential):
     def __init__(self):
@@ -48,8 +49,21 @@ class VAE_Encoder(nn.Sequential):
 
             nn.SiLU(),
 
-            #bs, 8, w/8, h/8
-            nn.Conv2d(CHANNEL*4,8,kernel_size=3,padding=1),
-            
-            nn.Conv2d(8,8,kernel_size=3,padding=1),
+            #bs, out_channel, w/8, h/8
+            nn.Conv2d(CHANNEL*4,OUT_CHANNEL,kernel_size=3,padding=1),
+
+            nn.Conv2d(OUT_CHANNEL,OUT_CHANNEL,kernel_size=3,padding=1),
         )
+    
+    def forward(
+        self,
+        x:torch.Tensor,
+        noise:torch.Tensor
+    ) -> torch.Tensor:
+        # x: bs, c, h, w
+        # noise: bs, oc, h/8, w/8
+
+        for m in self:
+            if getattr(m, "stride",None)==(2,2):
+                #left,right✅, top, bottom✅
+                x=F.pad(x,(0,1,0,1))
