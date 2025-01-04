@@ -6,14 +6,24 @@ from decoder import VAE_AttentionBlock, VAE_ResidualBlock
 CHANNEL=128
 OUT_CHANNEL=8
 
+'''
+    old old notes from 2 years ago
+    https://colab.research.google.com/drive/19GUkNMQ8O_ZWMr-bylUjhVMBEMW7GQE7?usp=sharing
+    based on https://github.com/mrdbourke/pytorch-deep-learning
+        kernel_size=3,#3*3
+        stride=1,#move 1 pix at a time --> output the same size
+        padding=1#add 2 to the h & w (1 left 1 right) to increase the output size by 2
+'''
+
+
 class VAE_Encoder(nn.Sequential):
-    def __init__(self):
+    def __init__(self,in_channels:int=3):
         """
         less pix, more info/pix
         """
         super().__init__(
             #bs, channel, w, h
-            nn.Conv2d(3,CHANNEL,kernel_size=3,padding=1),
+            nn.Conv2d(in_channels,CHANNEL,kernel_size=3,padding=1),
             
             VAE_ResidualBlock(CHANNEL,CHANNEL),
             VAE_ResidualBlock(CHANNEL,CHANNEL),
@@ -45,7 +55,7 @@ class VAE_Encoder(nn.Sequential):
             VAE_AttentionBlock(CHANNEL*4),
             VAE_ResidualBlock(CHANNEL*4,CHANNEL*4),
 
-            nn.GroupNorm(32,CHANNEL*4),
+            nn.GroupNorm(32,CHANNEL*4), #https://youtu.be/l_3zj6HeWUE
 
             nn.SiLU(),
 
@@ -72,6 +82,8 @@ class VAE_Encoder(nn.Sequential):
         #bs, oc, h/8, w/8 -> 2 * (bs, oc/2, h/8, w/8)
         mu,log_var=torch.chunk(x,2,dim=1)
 
+        #linit range -> var -> std
+        #N(mu, std^2)
         std=torch.clamp(log_var,-30,20).exp().sqrt()
 
         x=mu+std*noise
