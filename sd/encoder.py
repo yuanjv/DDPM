@@ -17,11 +17,39 @@ class VAE_Encoder(nn.Sequential):
             VAE_ResidualBlock(CHANNEL,CHANNEL),
             VAE_ResidualBlock(CHANNEL,CHANNEL),
             
-            #w/2,h/2
+            #bs, channel, w/2, h/2
             nn.Conv2d(CHANNEL,CHANNEL,kernel_size=3,stride=2,padding=0),
             
-            #channel*2
+            #bs, channel*2, w/2, h/2
             VAE_ResidualBlock(CHANNEL,CHANNEL*2),
 
-            VAE_ResidualBlock(CHANNEL*2,CHANNEL*2)
+            VAE_ResidualBlock(CHANNEL*2,CHANNEL*2),
+
+            #bs, c*2, h/4, w/4
+            nn.Conv2d(CHANNEL*2,CHANNEL*2,kernel_size=3,stride=2,padding=0),
+
+            #bs,c*4, w/4, h/4
+            VAE_ResidualBlock(CHANNEL*2,CHANNEL*4),
+
+            VAE_ResidualBlock(CHANNEL*4,CHANNEL*4),
+
+            #bs, c*4, w/8, h/8
+            nn.Conv2d(CHANNEL*4,CHANNEL*4,kernel_size=3,stride=2,padding=0),
+
+            VAE_ResidualBlock(CHANNEL*4,CHANNEL*4),
+            VAE_ResidualBlock(CHANNEL*4,CHANNEL*4),
+            VAE_ResidualBlock(CHANNEL*4,CHANNEL*4),
+
+
+            VAE_AttentionBlock(CHANNEL*4),
+            VAE_ResidualBlock(CHANNEL*4,CHANNEL*4),
+
+            nn.GroupNorm(32,CHANNEL*4),
+
+            nn.SiLU(),
+
+            #bs, 8, w/8, h/8
+            nn.Conv2d(CHANNEL*4,8,kernel_size=3,padding=1),
+            
+            nn.Conv2d(8,8,kernel_size=3,padding=1),
         )
