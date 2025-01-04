@@ -68,3 +68,12 @@ class VAE_Encoder(nn.Sequential):
                 #left,right✅, top, bottom✅
                 x=F.pad(x,(0,1,0,1))
             x=m(x)
+        
+        #bs, oc, h/8, w/8 -> 2 * (bs, oc/2, h/8, w/8)
+        mu,log_var=torch.chunk(x,2,dim=1)
+
+        std=torch.clamp(log_var,-30,20).exp().sqrt()
+
+        x=mu+std*noise
+
+        return x*0.18215
