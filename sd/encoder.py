@@ -67,3 +67,4 @@ class VAE_Encoder(nn.Sequential):
             if getattr(m, "stride",None)==(2,2):
                 #left,right✅, top, bottom✅
                 x=F.pad(x,(0,1,0,1))
+            x=m(x)
