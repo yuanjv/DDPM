@@ -17,7 +17,7 @@ OUT_CHANNEL=8
 
 
 class VAE_Encoder(nn.Sequential):
-    def __init__(self,in_channels:int=3):
+    def __init__(self,in_channels:int=3): #rgb
         """
         less pix, more info/pix
 
@@ -57,7 +57,7 @@ class VAE_Encoder(nn.Sequential):
             VAE_AttentionBlock(CHANNEL*4),
             VAE_ResidualBlock(CHANNEL*4,CHANNEL*4),
 
-            nn.GroupNorm(32,CHANNEL*4), #https://youtu.be/l_3zj6HeWUE
+            nn.GroupNorm(32,CHANNEL*4), #32 works great since 1st paper https://youtu.be/l_3zj6HeWUE
 
             nn.SiLU(),
 
