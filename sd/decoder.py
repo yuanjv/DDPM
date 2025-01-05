@@ -18,4 +18,5 @@ class VAE_ResidualBlock(nn.Module):
 
         self.gn1=nn.GroupNorm(32,out_channels)
 
+
         
