@@ -20,6 +20,8 @@ class VAE_Encoder(nn.Sequential):
     def __init__(self,in_channels:int=3):
         """
         less pix, more info/pix
+
+        channel ++, size --
         """
         super().__init__(
             #bs, channel, w, h
